@@ -67,10 +67,6 @@ function spawnHeart() {
   
   heart.innerText = objects[Math.floor(Math.random() * objects.length)];
 
-  // Random position starting from top
-  const startX = Math.random() * (window.innerWidth - 30);
-  heart.style.left = `${startX}px`;
-
   // Random speed - gets faster during Zoomies! (score >= 25)
   const isZoomies = score >= 25;
   if (isZoomies && !document.body.classList.contains("zoomies")) {
@@ -81,7 +77,41 @@ function spawnHeart() {
   let baseDuration = isZoomies ? 1.0 : (score >= 15 ? 1.5 : 3);
   let randomExtra = isZoomies ? 0.5 : (score >= 15 ? 1 : 2);
   const duration = Math.random() * randomExtra + baseDuration;
-  heart.style.animationDuration = `${duration}s`;
+
+  if (isCucumber) {
+    // 🥒 Crazy Cucumber Trajectories
+    heart.style.animation = "none"; // Disable normal CSS fall
+    const side = Math.floor(Math.random() * 3);
+    let cStartX, cStartY, cEndX, cEndY;
+    const h = window.innerHeight;
+    const w = window.innerWidth;
+    
+    if (side === 0) { // Top
+      cStartX = Math.random() * w; cStartY = -50; 
+      cEndX = cStartX + (Math.random() * 1000 - 500); cEndY = h + 50;
+    } else if (side === 1) { // Left
+      cStartX = -50; cStartY = Math.random() * (h / 2); 
+      cEndX = w + 150; cEndY = h + 150;
+    } else { // Right
+      cStartX = w + 50; cStartY = Math.random() * (h / 2); 
+      cEndX = -150; cEndY = h + 150;
+    }
+    
+    heart.style.left = `${cStartX}px`;
+    heart.style.top = `${cStartY}px`;
+    
+    // Animate via JS to let them spin and fly diagonally!
+    heart.animate([
+      { transform: `translate(0px, 0px) rotate(0deg)` },
+      { transform: `translate(${cEndX - cStartX}px, ${cEndY - cStartY}px) rotate(${Math.random() * 1080 - 540}deg)` }
+    ], { duration: duration * 1000, easing: "linear", fill: "forwards" });
+
+  } else {
+    // Normal falling items
+    const startX = Math.random() * (window.innerWidth - 30);
+    heart.style.left = `${startX}px`;
+    heart.style.animationDuration = `${duration}s`;
+  }
 
   gameContainer.appendChild(heart);
 
