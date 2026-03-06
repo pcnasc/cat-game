@@ -6,13 +6,14 @@ const gameContainer = document.getElementById("game-container");
 let score = 0;
 const targetScore = 30;
 let isGameOver = false;
+let gameStarted = false;
 
 // Move Cat
 let catX = window.innerWidth / 2;
 const speed = 15;
 
 document.addEventListener("mousemove", (e) => {
-  if (isGameOver) return;
+  if (isGameOver || !gameStarted) return;
   const halfWidth = cat.offsetWidth / 2;
   catX = e.clientX;
 
@@ -26,7 +27,7 @@ document.addEventListener("mousemove", (e) => {
 
 // Mobile Touch Support
 document.addEventListener("touchmove", (e) => {
-  if (isGameOver) return;
+  if (isGameOver || !gameStarted) return;
   const touch = e.touches[0];
   const halfWidth = cat.offsetWidth / 2;
   // Boundary check
@@ -44,7 +45,7 @@ function playMeow() {
   // Clone the node so rapid meows can overlap
   const meowClone = meowSound.cloneNode();
   meowClone.volume = 0.5; // Optional: Adjust volume here (0.0 to 1.0)
-  meowClone.play().catch(e => console.log("Audio play failed:", e));
+  meowClone.play().catch((e) => console.log("Audio play failed:", e));
 }
 
 // Spawn Objects
@@ -92,7 +93,7 @@ function spawnHeart() {
       scoreDisplay.innerText = score;
       clearInterval(checkCollision);
       heart.remove(); // Remove heart
-      
+
       playMeow(); // 🎶 Meow!
 
       // Cute effect on the cat when it catches something
@@ -132,4 +133,22 @@ function scheduleNextHeart() {
   const delay = score >= 15 ? 500 : 1000;
   setTimeout(scheduleNextHeart, delay);
 }
-scheduleNextHeart();
+
+// Start Game Logic
+const startOverlay = document.getElementById("start-overlay");
+const startBtn = document.getElementById("start-btn");
+
+startBtn.addEventListener("click", () => {
+  // Unlock audio on first interaction
+  meowSound
+    .play()
+    .then(() => {
+      meowSound.pause();
+      meowSound.currentTime = 0;
+    })
+    .catch((e) => console.log("Audio unlock failed:", e));
+
+  startOverlay.classList.add("hidden");
+  gameStarted = true;
+  scheduleNextHeart(); // Start the loop
+});
