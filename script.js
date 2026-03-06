@@ -4,7 +4,7 @@ const messageOverlay = document.getElementById("message-overlay");
 const gameContainer = document.getElementById("game-container");
 
 let score = 0;
-const targetScore = 30;
+const targetScore = 50; // Increased so she can experience Zoomies and Cucumbers!
 let isGameOver = false;
 let gameStarted = false;
 
@@ -55,17 +55,31 @@ function spawnHeart() {
   const heart = document.createElement("div");
   heart.classList.add("heart");
 
-  // Randomize emoji (hearts, cotton, treats)
-  const objects = ["❤️", "☁️", "🐟", "💕"];
+  // Randomize emoji (hearts, cotton, treats, and rarely... CUCUMBERS!)
+  let objects = ["❤️", "☁️", "🐟", "💕"];
+  
+  // 15% chance to spawn the Cucumber of Doom 🥒
+  let isCucumber = false;
+  if (Math.random() < 0.15) {
+     objects = ["🥒"];
+     isCucumber = true;
+  }
+  
   heart.innerText = objects[Math.floor(Math.random() * objects.length)];
 
   // Random position starting from top
   const startX = Math.random() * (window.innerWidth - 30);
   heart.style.left = `${startX}px`;
 
-  // Random speed - gets faster if score >= 15
-  let baseDuration = score >= 15 ? 1.5 : 3;
-  let randomExtra = score >= 15 ? 1 : 2;
+  // Random speed - gets faster during Zoomies! (score >= 25)
+  const isZoomies = score >= 25;
+  if (isZoomies && !document.body.classList.contains("zoomies")) {
+      document.body.classList.add("zoomies");
+      cat.classList.add("zoomies");
+  }
+
+  let baseDuration = isZoomies ? 1.0 : (score >= 15 ? 1.5 : 3);
+  let randomExtra = isZoomies ? 0.5 : (score >= 15 ? 1 : 2);
   const duration = Math.random() * randomExtra + baseDuration;
   heart.style.animationDuration = `${duration}s`;
 
@@ -88,21 +102,41 @@ function spawnHeart() {
       heartRect.bottom > catRect.top &&
       heartRect.top < catRect.bottom
     ) {
-      // Collision detected!
-      score++;
-      scoreDisplay.innerText = score;
       clearInterval(checkCollision);
-      heart.remove(); // Remove heart
+      heart.remove(); // Remove item
+      
+      if (isCucumber) {
+        // Oh no!! JUMP SCARE!
+        score = Math.max(0, score - 3); // Lose 3 points!
+        scoreDisplay.innerText = score;
+        
+        // Hiss! 😾 (We lower the pitch of playMeow to sound angry)
+        const angryMeow = meowSound.cloneNode();
+        angryMeow.playbackRate = 0.5;
+        angryMeow.volume = 0.8;
+        angryMeow.play().catch(e => console.log(e));
+        
+        // Spin scare animation
+        cat.style.animation = "spinScare 0.6s ease-in-out";
+        setTimeout(() => {
+           cat.style.animation = "none";
+        }, 600);
+        
+      } else {
+        // Yay! Good catch
+        score++;
+        scoreDisplay.innerText = score;
+        
+        playMeow(); // 🎶 Meow!
 
-      playMeow(); // 🎶 Meow!
+        // Cute effect on the cat when it catches something
+        cat.style.transform = `translateX(-50%) scale(1.2)`;
+        setTimeout(() => {
+          cat.style.transform = `translateX(-50%) scale(1)`;
+        }, 100);
 
-      // Cute effect on the cat when it catches something
-      cat.style.transform = `translateX(-50%) scale(1.2)`;
-      setTimeout(() => {
-        cat.style.transform = `translateX(-50%) scale(1)`;
-      }, 100);
-
-      checkWin();
+        checkWin();
+      }
     }
 
     // Remove if off screen
@@ -129,8 +163,8 @@ function checkWin() {
 function scheduleNextHeart() {
   if (isGameOver) return;
   spawnHeart();
-  // Spawn faster if score >= 15
-  const delay = score >= 15 ? 500 : 1000;
+  // Zoomies mode makes hearts spawn incredibly fast!
+  const delay = score >= 25 ? 200 : (score >= 15 ? 500 : 1000);
   setTimeout(scheduleNextHeart, delay);
 }
 

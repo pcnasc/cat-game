@@ -9,6 +9,8 @@ body {
   background-color: #ffe6f0; /* Soft pastel pink */
   overflow: hidden;
   touch-action: none; /* Prevent scrolling on mobile */
+  /* Laser Pointer Cursor 🔴 */
+  cursor: url('data:image/svg+xml;utf8,<svg width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="6" r="5" fill="red" opacity="0.9" stroke="white" stroke-width="1.5"/></svg>') 6 6, auto;
 }
 
 #game-container {
@@ -35,10 +37,30 @@ body {
   transform: translateX(-50%);
   font-size: 5rem; /* Big cute emoji */
   transition: transform 0.1s ease-out;
-  cursor: grab;
+  cursor: none; /* Hide default cursor to just show the laser on hover */
   user-select: none;
   z-index: 5;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+}
+
+/* Zoomies Mode! */
+body.zoomies {
+  animation: bgFlash 0.5s infinite alternate;
+}
+@keyframes bgFlash {
+  from { background-color: #ffe6f0; }
+  to { background-color: #ffb3d1; }
+}
+
+#cat.zoomies {
+  transition: transform 0.05s ease-out; /* Faster twitching! */
+}
+
+/* Cucumber Jump Scare */
+@keyframes spinScare {
+  0% { transform: translateX(-50%) rotate(0deg) scale(1); }
+  50% { transform: translateX(-50%) translateY(-100px) rotate(180deg) scale(1.5); }
+  100% { transform: translateX(-50%) translateY(0px) rotate(360deg) scale(1); }
 }
 
 .heart {
